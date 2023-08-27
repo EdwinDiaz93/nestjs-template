@@ -2,6 +2,12 @@
 /dist
 /node_modules
 
+# environment
+.env
+
+# pgdata
+/pgdata
+
 # Logs
 logs
 *.log
