@@ -66,6 +66,11 @@ export class UsersService {
     return user;
   }
 
+  async findOneByEmail(email: string) {
+    const user = this.userRepository.findOneBy({ email });
+    return user;
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     try {
       const user = await this.userRepository.preload({ id, ...updateUserDto })
