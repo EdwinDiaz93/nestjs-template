@@ -1,5 +1,5 @@
-import { Repository } from 'typeorm'
 import * as bcrypt from 'bcrypt'
+import { Repository } from 'typeorm'
 
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
@@ -21,7 +21,6 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly configService: ConfigService,
     private readonly helperService: HelpersService,
   ) { }
 
@@ -66,10 +65,7 @@ export class UsersService {
     return user;
   }
 
-  async findOneByEmail(email: string) {
-    const user = this.userRepository.findOneBy({ email });
-    return user;
-  }
+
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     try {
@@ -89,8 +85,7 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    const user = await this.findOne(id);
-    await this.userRepository.delete(user);
+    await this.userRepository.delete(id);
   }
 
   async insertUsers(users: SeedUser[]) {
