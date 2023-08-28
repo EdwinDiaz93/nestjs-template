@@ -9,7 +9,7 @@ import { JwtPayload } from './interfaces';
 import { LoginDto } from './dto';
 import { CreateUserDto } from '../users/dto';
 
-import { User } from '../users/entities/user.entity';
+import { User } from '../users/entities';
 
 
 @Injectable()

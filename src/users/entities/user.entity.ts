@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, OneToMany } from "typeorm";
+import { UserRol } from "./";
 
 @Entity({
     name: 'users',
@@ -22,6 +23,9 @@ export class User {
         nullable: false,
     })
     password: string;
+
+    @OneToMany(() => UserRol, userRol => userRol.userId)
+    public userRol: UserRol[];
 
     @BeforeInsert()
     @BeforeUpdate()

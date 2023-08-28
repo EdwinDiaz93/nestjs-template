@@ -3,7 +3,6 @@ import { Repository } from 'typeorm'
 
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
-import { ConfigService } from '@nestjs/config';
 
 import { HelpersService } from '../common/helpers/helpers.service';
 
@@ -11,7 +10,7 @@ import { Resource } from '../common/models';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { PaginationDto } from '../common/dtos/pagination.dto';
 
-import { User } from './entities/user.entity';
+import { User } from './entities';
 import { SeedUser } from '../seed/interfaces';
 
 

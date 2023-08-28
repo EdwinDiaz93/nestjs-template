@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AuthModule } from './auth/auth.module';
     CommonModule,
     SeedModule,
     AuthModule,
+    RolesModule,
   ],
   exports: [TypeOrmModule]
 })

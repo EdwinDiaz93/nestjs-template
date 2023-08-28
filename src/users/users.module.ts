@@ -9,7 +9,7 @@ import { CommonModule } from '../common/common.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
-import { User } from './entities/user.entity';
+import { User, Rol, UserRol } from './entities';
 
 
 @Module({
@@ -17,7 +17,13 @@ import { User } from './entities/user.entity';
   providers: [UsersService],
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature(
+      [
+        User,
+        Rol,
+        UserRol,
+      ]
+    ),
     CommonModule,
     AuthModule,
   ],

@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 
 import { JwtStrategy } from './strategies'
 
-import { User } from '../users/entities/user.entity';
+import { User } from '../users/entities';
 
 @Module({
   controllers: [AuthController],
