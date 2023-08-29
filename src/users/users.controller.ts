@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Delete, Param, Query, ParseUUIDPipe } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import {Auth} from '../auth/decorators'
 
@@ -9,7 +10,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 
 @Controller('users')
-
+@ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
