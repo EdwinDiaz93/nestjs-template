@@ -7,6 +7,7 @@
 ```
   git clone https://github.com/EdwinDiaz93/nestjs-template.git
 ```
+
 2. Ingresar al proyecto y ejecutar
 
 ```
@@ -21,11 +22,13 @@
 ```
   docker-compose up -d
 ```
+
 6. Levantar el proyecto
 ```
    yarn start:dev
 ```
-7. llamar el siguiente endopint para poblar la base de datos
+
+7. llamar el siguiente endpoint para poblar la base de datos
 ```
   http://localhost:3000/api/v1/seed
 ```
