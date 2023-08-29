@@ -1,5 +1,6 @@
 
 
 export enum Resource {
-    users = 'users'
+    users = 'users',
+    roles = 'roles'
 }

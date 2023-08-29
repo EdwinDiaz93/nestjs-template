@@ -21,14 +21,14 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('nest template')
+    .setDescription('The nest template description')
     .setVersion('1.0')
-    .addTag('cats')
+    .addTag('Nestjs template')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
 
 
   await app.listen(process.env.PORT);

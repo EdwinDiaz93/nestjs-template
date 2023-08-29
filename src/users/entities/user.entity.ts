@@ -1,6 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, OneToMany } from "typeorm";
-import { UserRol } from "./";
-
+import { Column, Entity, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, ManyToMany, JoinTable } from "typeorm";
+import { Rol } from '../../roles/entities'
 @Entity({
     name: 'users',
 })
@@ -24,13 +23,16 @@ export class User {
     })
     password: string;
 
-    @OneToMany(() => UserRol, userRol => userRol.userId)
-    public userRol: UserRol[];
+    @ManyToMany(() => Rol,{ eager: true })
+    @JoinTable({ name: 'user_rol' })
+    public roles: Rol[];
 
     @BeforeInsert()
     @BeforeUpdate()
     transformEmail() {
         this.email = this.email.toLocaleLowerCase();
     }
+
+
 
 }

@@ -1,26 +1,98 @@
-import { Injectable } from '@nestjs/common';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
+import { Repository } from 'typeorm';
+
+import { Injectable, BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { HelpersService } from '../common/helpers/helpers.service'
+
+import { PaginationDto } from '../common/dtos'
+import { CreateRoleDto, UpdateRoleDto } from './dto';
+
+import { Resource } from '../common/models'
+
+import { Rol } from './entities'
+
+import { SeedRol } from '../seed/interfaces'
 
 @Injectable()
 export class RolesService {
-  create(createRoleDto: CreateRoleDto) {
-    return 'This action adds a new role';
+
+  constructor(
+    @InjectRepository(Rol)
+    private readonly rolRepository: Repository<Rol>,
+    private readonly helpersService: HelpersService,
+  ) { }
+
+  async create(createRoleDto: CreateRoleDto) {
+    try {
+      const rol = this.rolRepository.create(createRoleDto);
+      await this.rolRepository.save(rol);
+      return rol;
+    } catch (error) {
+      this.handleDbExceptions(error);
+    }
   }
 
-  findAll() {
-    return `This action returns all roles`;
+  async findAll({ limit = 10, page = 1 }: PaginationDto) {
+    const offset = await this.helpersService.getOffset(page, limit);
+
+    const [roles, totalRows] = await this.rolRepository.findAndCount({
+      take: limit,
+      skip: offset,
+      select: { id: true, name: true }
+    });
+
+    const paginationObject = await this.helpersService.generatePaginationObject(page, limit, totalRows, Resource.roles, roles);
+
+    return paginationObject;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
+  async findOne(id: string) {
+    const rol = await this.rolRepository.findOneBy({ id });
+
+    if (!rol) throw new NotFoundException(`rol with id ${id} not found`);
+
+    return rol;
   }
 
-  update(id: number, updateRoleDto: UpdateRoleDto) {
-    return `This action updates a #${id} role`;
+  async update(id: string, updateRoleDto: UpdateRoleDto) {
+    try {
+      const rol = await this.rolRepository.preload({ id, ...updateRoleDto })
+
+      if (!rol) throw new NotFoundException(`rol with id ${id} not found`);
+
+      await this.rolRepository.save(rol);
+      return rol;
+    } catch (error) {
+      this.handleDbExceptions(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} role`;
+  async remove(id: string) {
+    await this.rolRepository.delete({ id });
   }
+
+  async deleteAllRoles() {
+    const queryBuilder = this.rolRepository.createQueryBuilder();
+    await queryBuilder
+      .delete()
+      .where({})
+      .execute();
+  }
+
+  async inserRoles(roles: SeedRol[]) {
+    const rolesDb = this.rolRepository.create(roles)
+    await this.rolRepository.insert(rolesDb);
+    return rolesDb;
+  }
+
+  private handleDbExceptions(error: any) {
+
+    if (error.code === '23505')
+      throw new BadRequestException(`error: ${error.detail}`);
+
+    console.log(error);
+    throw new InternalServerErrorException(`something went wrong`);
+  }
+
 }

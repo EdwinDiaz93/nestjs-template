@@ -1,15 +1,19 @@
 import * as bcrypt from 'bcrypt'
 import { Repository } from 'typeorm';
 
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 
 import { JwtPayload } from './interfaces';
+
+import { ValidRoles } from '../common/models'
+
 import { LoginDto } from './dto';
 import { CreateUserDto } from '../users/dto';
 
 import { User } from '../users/entities';
+import { Rol } from '../roles/entities';
 
 
 @Injectable()
@@ -18,6 +22,9 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(Rol)
+    private readonly rolRepository: Repository<Rol>,
 
     private readonly jwtService: JwtService,
   ) { }
@@ -30,28 +37,50 @@ export class AuthService {
 
     if (!bcrypt.compareSync(password, user.password)) throw new UnauthorizedException(`Credential are not valid`);
 
+
+    const roles = user.roles.map(rol => rol.name);
+
+
     delete user.password;
+    delete user.roles;
 
     return {
       ...user,
-      token: this.generateJwt({ id: user.id })
+      token: this.generateJwt({ id: user.id, roles })
     };
   }
 
   async register(createUserDto: CreateUserDto) {
-    const user = await this.userRepository.create({
-      ...createUserDto,
-      password: bcrypt.hashSync(createUserDto.password, bcrypt.genSaltSync(10)),
-    });
 
-    await this.userRepository.save(user);
+    try {
+      const userRol = await this.rolRepository.findOneBy({ name: ValidRoles.user });
+      const user = await this.userRepository.create({
+        ...createUserDto,
+        password: bcrypt.hashSync(createUserDto.password, bcrypt.genSaltSync(10)),
+        roles: [
+          userRol,
+        ]
+      });
 
-    delete user.password;
+      await this.userRepository.save(user);
 
-    return {
-      ...user,
-      token: this.generateJwt({ id: user.id }),
-    };
+      const roles = user.roles.map(rol => rol.name);
+
+      delete user.password;
+      delete user.roles;
+
+
+      return {
+        ...user,
+        token: this.generateJwt({ id: user.id, roles }),
+      };
+    } catch (error) {
+      console.log(error);
+      if (error.code === '23505') throw new BadRequestException(`error: ${error.detail}`);
+
+      throw new InternalServerErrorException('Something went wrong');
+    }
+
   }
 
   private generateJwt(jwtPayload: JwtPayload) {

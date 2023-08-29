@@ -10,6 +10,7 @@ import { AuthService } from './auth.service';
 
 import { JwtStrategy } from './strategies'
 
+import { Rol } from '../roles/entities';
 import { User } from '../users/entities';
 
 @Module({
@@ -17,7 +18,7 @@ import { User } from '../users/entities';
   providers: [AuthService, JwtStrategy],
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Rol]),
     PassportModule.register({
       defaultStrategy: 'jwt'
     }),

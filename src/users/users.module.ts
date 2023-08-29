@@ -4,12 +4,14 @@ import { ConfigModule } from '@nestjs/config';
 
 import { AuthModule } from '../auth/auth.module';
 import { CommonModule } from '../common/common.module';
+import { RolesModule } from 'src/roles/roles.module';
 
 
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
-import { User, Rol, UserRol } from './entities';
+import { User } from './entities';
+import { Rol } from '../roles/entities';
 
 
 @Module({
@@ -17,15 +19,10 @@ import { User, Rol, UserRol } from './entities';
   providers: [UsersService],
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature(
-      [
-        User,
-        Rol,
-        UserRol,
-      ]
-    ),
+    TypeOrmModule.forFeature([User, Rol]),
     CommonModule,
     AuthModule,
+    RolesModule,
   ],
   exports: [
     TypeOrmModule,
