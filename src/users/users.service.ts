@@ -39,15 +39,18 @@ export class UsersService {
       else
         roles = await this.rolRepository.findBy({ name: ValidRoles.user });
 
-      const user = await this.userRepository.create({
+      const user = this.userRepository.create({
         ...createUserDto,
         password: bcrypt.hashSync(createUserDto.password, bcrypt.genSaltSync(10)),
-        roles
+        roles: Promise.resolve([]),
       });
 
+      user.roles = Promise.resolve([roles]);
       await this.userRepository.save(user);
 
-      delete user.roles;
+      delete user.password;
+      delete user['__roles__'];
+      delete user['__has_roles__'];
 
       return user
     } catch (error) {
@@ -84,27 +87,28 @@ export class UsersService {
 
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    try {
 
-      const roles = await this.rolRepository.findBy({ id: In(updateUserDto.roles) });
+    const roles = await this.rolRepository.findBy({ id: In(updateUserDto.roles) });
 
-      if (!roles) throw new BadRequestException('roles not found');
+    if (!roles || roles.length === 0) throw new BadRequestException('roles not found');
 
-      const user = await this.userRepository.preload({ id, ...updateUserDto, roles })
+    const user = await this.userRepository.preload({ id, ...updateUserDto, roles: Promise.resolve(roles) })
 
-      if (!user) throw new NotFoundException(`user with id ${id} not found`);
+    if (!user) throw new NotFoundException(`user with id ${id} not found`);
 
-      const userDb = {
-        ...user,
-        password: updateUserDto.password && bcrypt.hashSync(updateUserDto.password, bcrypt.genSaltSync(10)),
-      }
-      await this.userRepository.save(userDb);
-      
-      delete userDb.roles;
-      return userDb;
-    } catch (error) {
-      this.handleDbExceptions(error);
+    const userDb = {
+      ...user,
+      password: updateUserDto.password && bcrypt.hashSync(updateUserDto.password, bcrypt.genSaltSync(10)),
     }
+
+
+    await this.userRepository.save(userDb);
+
+    delete userDb.password;
+    delete userDb['__roles__'];
+    delete userDb['__has_roles__'];
+    return userDb;
+
 
 
   }
@@ -113,9 +117,19 @@ export class UsersService {
     await this.userRepository.delete(id);
   }
 
-  async insertUsers(users: SeedUser[]) {
-    const usersToStore = users.map(user => this.userRepository.create(user));
-    await this.userRepository.save(usersToStore);
+  async insertUsers(admin: SeedUser, users: SeedUser[], adminRol: Rol, userRol: Rol) {
+
+    const adminToSave = this.userRepository.create(admin);
+    adminToSave.roles = Promise.resolve([adminRol]);
+
+    const usersToStore = users.map(user => {
+      const userToStore = this.userRepository.create(user)
+      userToStore.roles = Promise.resolve([userRol]);
+      return userToStore;
+    });
+
+    await this.userRepository.save([adminToSave, ...usersToStore]);
+
   }
 
   async deleteAllUsers() {

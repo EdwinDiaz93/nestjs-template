@@ -37,16 +37,17 @@ export class AuthService {
 
     if (!bcrypt.compareSync(password, user.password)) throw new UnauthorizedException(`Credential are not valid`);
 
+    const roles = await user.roles;
 
-    const roles = user.roles.map(rol => rol.name);
-
+    const flatRoles = roles.map(rol => rol.name);
 
     delete user.password;
-    delete user.roles;
+    delete user['__roles__'];
+    delete user['__has_roles__'];
 
     return {
       ...user,
-      token: this.generateJwt({ id: user.id, roles })
+      token: this.generateJwt({ id: user.id, roles: flatRoles })
     };
   }
 
@@ -54,25 +55,26 @@ export class AuthService {
 
     try {
       const userRol = await this.rolRepository.findOneBy({ name: ValidRoles.user });
-      const user = await this.userRepository.create({
+      const user = this.userRepository.create({
         ...createUserDto,
         password: bcrypt.hashSync(createUserDto.password, bcrypt.genSaltSync(10)),
-        roles: [
-          userRol,
-        ]
+        roles: Promise.resolve([]),
       });
+
+      user.roles = Promise.resolve([userRol]);
 
       await this.userRepository.save(user);
 
-      const roles = user.roles.map(rol => rol.name);
+      const roles = await user.roles;
+      const flatRoles = roles.map(rol => rol.name);
 
       delete user.password;
-      delete user.roles;
-
-
+      delete user['__roles__'];
+      delete user['__has_roles__'];      
+      
       return {
         ...user,
-        token: this.generateJwt({ id: user.id, roles }),
+        token: this.generateJwt({ id: user.id, roles: flatRoles }),
       };
     } catch (error) {
       console.log(error);
