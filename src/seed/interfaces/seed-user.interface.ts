@@ -4,5 +4,5 @@ export interface SeedUser {
     email: string;
     fullName: string;
     password: string;
-    roles: Promise<Rol[]>,
+    roles: Rol[];
 }

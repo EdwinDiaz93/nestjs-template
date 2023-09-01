@@ -23,9 +23,9 @@ export class User {
     })
     password: string;
 
-    @ManyToMany(() => Rol, { lazy: true })
+    @ManyToMany(() => Rol, { eager: true })
     @JoinTable({ name: 'user_rol', })
-    roles: Promise<Rol[]>;
+    roles: Rol[];
 
     @BeforeInsert()
     @BeforeUpdate()

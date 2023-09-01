@@ -27,9 +27,10 @@ export class SeedService {
   }
 
   private async insertUsers(adminRol: Rol, userRol: Rol) {
-
+    const admin = { ...initialData.admin, roles: [adminRol] }
+    const users = initialData.users.map((user) => ({ ...user, roles: [userRol] }));
     await this.usersService.deleteAllUsers();
-    await this.usersService.insertUsers(initialData.admin,initialData.users,adminRol,userRol);
+    await this.usersService.insertUsers([admin, ...users]);
   }
 
   private async insertRoles(roles: SeedRol[]) {

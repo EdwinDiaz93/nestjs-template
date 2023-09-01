@@ -42,9 +42,7 @@ export class AuthService {
     const flatRoles = roles.map(rol => rol.name);
 
     delete user.password;
-    delete user['__roles__'];
-    delete user['__has_roles__'];
-
+    delete user.roles;
     return {
       ...user,
       token: this.generateJwt({ id: user.id, roles: flatRoles })
@@ -58,10 +56,9 @@ export class AuthService {
       const user = this.userRepository.create({
         ...createUserDto,
         password: bcrypt.hashSync(createUserDto.password, bcrypt.genSaltSync(10)),
-        roles: Promise.resolve([]),
+        roles: [userRol],
       });
 
-      user.roles = Promise.resolve([userRol]);
 
       await this.userRepository.save(user);
 
@@ -69,9 +66,7 @@ export class AuthService {
       const flatRoles = roles.map(rol => rol.name);
 
       delete user.password;
-      delete user['__roles__'];
-      delete user['__has_roles__'];      
-      
+      delete user.roles;
       return {
         ...user,
         token: this.generateJwt({ id: user.id, roles: flatRoles }),

@@ -18,6 +18,6 @@ export class Rol {
     name: string;
 
     @ManyToMany(() => User)
-    public users: Promise<User[]>;
+    public users: User[];
 
 } 

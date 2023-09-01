@@ -31,12 +31,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
         if (!user) throw new UnauthorizedException('Invalid token');
 
-        const roles = await user.roles;
+        delete user.password;
 
-        return {
-            ...user,
-            roles,
-        };
+        return user;
     }
 
 
